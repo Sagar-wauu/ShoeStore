@@ -1,5 +1,5 @@
 <?php
-// Start session only if not already started
+// Start session only if not already startedgit
 if(session_status() === PHP_SESSION_NONE) {
     session_start();
 }
