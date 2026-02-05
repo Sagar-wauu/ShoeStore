@@ -1,4 +1,18 @@
-<?php include 'dp.php'; include 'auth.php'; ?>
+<?php 
+include 'dp.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+// Helper: check if user is logged in
+function is_logged_in() {
+    return isset($_SESSION['user_id']);
+}
+// include 'auth.php';
+// Helper: check if user is admin
+function is_admin() {
+    return isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,7 +61,25 @@
 
 <!-- Navigation -->
 <nav class="navbar">
-    <div class="logo">🛒 ShoeStore</div>
+    <div class="logo">🛒 ShoeStore
+        <?php 
+        if(is_logged_in() && !is_admin()) {
+            // Fetch user name from database
+            $user_id = $_SESSION['user_id'];
+            $user_name = '';
+            $stmt = $conn->prepare("SELECT name FROM users WHERE id=?");
+            $stmt->bind_param('i', $user_id);
+            if($stmt->execute()) {
+                $stmt->bind_result($user_name);
+                $stmt->fetch();
+            }
+            $stmt->close();
+            if($user_name) {
+                echo '<span style="font-size:16px; margin-left:15px; color:#1976d2;">Welcome ' . htmlspecialchars($user_name) . '</span>';
+            }
+        }
+        ?>
+    </div>
     
     <div class="search-container">
         <input type="text" id="brandSearch" class="search-input" placeholder="Search brands..." autocomplete="off">
