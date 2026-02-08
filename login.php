@@ -3,7 +3,7 @@ include 'dp.php';
 include 'auth.php';
 
 $err = '';
-$next = $_GET['next'] ?? 'front.php';
+$next = $_GET['next'] ?? 'index.php';
 
 if($_SERVER['REQUEST_METHOD']==='POST'){
     $email = trim($_POST['email'] ?? '');
@@ -43,7 +43,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
                 if($row['is_admin'] == 1){
                     header('Location: admin_dashboard.php');
                 } else {
-                    header('Location: front.php');
+                    header('Location: index.php');
                 }
                 exit;
             } else {
@@ -82,7 +82,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     </form>
     
     <p>Don't have an account? <a href="register.php">Create one now</a></p>
-    <p><a href="front.php">← Back to Home</a></p>
+    <p><a href="index.php">← Back to Home</a></p>
 </div>
 </body>
 </html>
