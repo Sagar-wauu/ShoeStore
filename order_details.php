@@ -30,9 +30,10 @@ if(!$order) {
 
 // Fetch order items
 $items_stmt = $conn->prepare("
-    SELECT product_name, price, quantity, total 
-    FROM order_items 
-    WHERE order_id=?
+    SELECT oi.product_name, oi.price, oi.quantity, oi.total, p.image
+    FROM order_items oi
+    LEFT JOIN products p ON oi.product_id = p.id
+    WHERE oi.order_id=?
 ");
 $items_stmt->bind_param('i', $order_id);
 $items_stmt->execute();
@@ -62,8 +63,9 @@ $items_stmt->close();
         .status-cancelled { background:#f8d7da; color:#721c24; }
         .payment-status { margin-top:10px; font-size:12px; }
         .items-table { width:100%; border-collapse:collapse; margin-bottom:20px; }
-        .items-table th, .items-table td { padding:12px; text-align:left; border-bottom:1px solid #ddd; }
+        .items-table th, .items-table td { padding:12px; text-align:left; border-bottom:1px solid #ddd; vertical-align: middle; }
         .items-table th { background:#f5f5f5; font-weight:bold; }
+        .product-img-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 15px; vertical-align: middle; }
         .summary { background:#f5f5f5; padding:15px; border-radius:4px; margin-bottom:20px; }
         .summary-row { display:flex; justify-content:space-between; margin-bottom:10px; }
         .summary-row.total { font-size:18px; font-weight:bold; border-top:2px solid #ddd; padding-top:10px; margin-top:10px; }
@@ -81,7 +83,7 @@ $items_stmt->close();
 <nav class="navbar">
     <div class="logo">🛒 ShoeStore</div>
     <ul class="nav-links">
-        <li><a href="front.php">Home</a></li>
+        <li><a href="index.php">Home</a></li>
         <li><a href="products.php">Products</a></li>
         <li><a href="cart.php">Cart 🛒</a></li>
         <li><a href="profile.php">👤 Profile</a></li>
@@ -126,7 +128,12 @@ $items_stmt->close();
             <tbody>
                 <?php while($item = $items_result->fetch_assoc()): ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($item['product_name']); ?></td>
+                        <td>
+                            <?php if(!empty($item['image'])): ?>
+                                <img src="Product images/<?php echo htmlspecialchars($item['image']); ?>" alt="Product" class="product-img-thumb">
+                            <?php endif; ?>
+                            <?php echo htmlspecialchars($item['product_name']); ?>
+                        </td>
                         <td style="text-align:right;">Rs. <?php echo number_format($item['price'], 2); ?></td>
                         <td style="text-align:right;"><?php echo $item['quantity']; ?></td>
                         <td style="text-align:right;">Rs. <?php echo number_format($item['total'], 2); ?></td>

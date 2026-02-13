@@ -161,7 +161,7 @@ if(!empty($order) && isset($order['total_amount']) && is_numeric($order['total_a
 <nav class="navbar">
     <div class="logo">🛒 ShoeStore</div>
     <ul class="nav-links">
-        <li><a href="front.php">Home</a></li>
+        <li><a href="index.php">Home</a></li>
         <li><a href="products.php">Products</a></li>
         <li><a href="profile.php">👤 Profile</a></li>
         <li><a href="logout.php">Logout</a></li>
@@ -198,7 +198,7 @@ if(!empty($order) && isset($order['total_amount']) && is_numeric($order['total_a
         
         <div style="margin-top:30px;">
             <a href="profile.php" class="btn">View My Orders</a>
-            <a href="front.php" class="btn">Continue Shopping</a>
+            <a href="index.php" class="btn">Continue Shopping</a>
         </div>
     </div>
 </div>

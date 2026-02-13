@@ -68,7 +68,7 @@ $related = $conn->query("SELECT id, name, price, image FROM products WHERE categ
 <nav class="navbar">
     <div class="logo">🛒 ShoeStore</div>
     <ul class="nav-links">
-        <li><a href="front.php">Home</a></li>
+        <li><a href="index.php">Home</a></li>
         <li><a href="products.php">Products</a></li>
         <li><a href="cart.php">Cart 🛒</a></li>
         <?php if(is_logged_in()): ?>
@@ -123,22 +123,39 @@ $related = $conn->query("SELECT id, name, price, image FROM products WHERE categ
                 <?php echo nl2br(htmlspecialchars($product['description'] ?? 'N/A')); ?>
             </div>
             
-            <form method="POST" action="cart.php">
+            <form method="POST" action="cart.php" id="tAddToCartForm" onsubmit="return validateStock()">
                 <div class="qty-selector">
                     <label>Quantity:</label>
-                    <input type="number" name="qty" value="1" min="1" max="<?php echo max(1, $product['quantity'] ?? 0); ?>" required>
+                    <input type="number" id="qtyInput" name="qty" value="1" min="1" required>
                 </div>
                 
                 <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
+                <input type="hidden" id="stockLimit" value="<?php echo $product['quantity']; ?>">
                 
                 <?php if(isset($product['quantity']) && $product['quantity'] > 0): ?>
                     <button type="submit" class="btn-primary">Add to Cart 🛒</button>
+                    <p id="stockError" style="color:red; display:none; margin-top:10px;"></p>
                 <?php else: ?>
                     <button type="button" class="btn-primary disabled">Out of Stock</button>
                 <?php endif; ?>
             </form>
         </div>
     </div>
+    
+    <script>
+    function validateStock() {
+        var qty = parseInt(document.getElementById('qtyInput').value);
+        var stock = parseInt(document.getElementById('stockLimit').value);
+        var errorMsg = document.getElementById('stockError');
+        
+        if(qty > stock) {
+            errorMsg.innerText = "❌ Only " + stock + " unit(s) available in stock.";
+            errorMsg.style.display = 'block';
+            return false;
+        }
+        return true;
+    }
+    </script>
     
     <?php if($related->num_rows > 0): ?>
         <div class="related">

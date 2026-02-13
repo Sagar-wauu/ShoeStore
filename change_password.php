@@ -1,6 +1,7 @@
 <?php
 include 'dp.php';
 include 'auth.php';
+require_once 'custom_password.php'; // Add this line
 
 require_login();
 
@@ -30,10 +31,10 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $result->fetch_assoc();
         $stmt->close();
         
-        if(!password_verify($current_pass, $user['password'])) {
+        if(!verifyCustomPassword($current_pass, $user['password'])) {
             $err = '❌ Current password is incorrect';
         } else {
-            $new_hash = password_hash($new_pass, PASSWORD_DEFAULT);
+            $new_hash = customHashPassword($new_pass); // Use custom hashing
             $stmt = $conn->prepare("UPDATE users SET password=? WHERE id=?");
             $stmt->bind_param('si', $new_hash, $_SESSION['user_id']);
             
@@ -75,7 +76,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
 <nav class="navbar">
     <div class="logo">🛒 ShoeStore</div>
     <ul class="nav-links">
-        <li><a href="front.php">Home</a></li>
+        <li><a href="index.php">Home</a></li>
         <li><a href="profile.php">👤 Profile</a></li>
         <li><a href="logout.php">Logout</a></li>
     </ul>

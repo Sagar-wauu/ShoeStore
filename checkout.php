@@ -6,8 +6,12 @@ if (!is_logged_in()) {
     header('Location: login.php');
     exit();
 }
+if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
+    header('Location: cart.php');
+    exit();
+}
 
-$cart = isset($_SESSION['cart']) ? $_SESSION['cart'] : [];
+$cart = $_SESSION['cart'];
 $subtotal = 0;
 foreach ($cart as $item) {
     $subtotal += $item['price'] * $item['qty'];
@@ -21,6 +25,7 @@ $success = '';
 // Pre-fill user info if available
 $user_name = $_SESSION['user_name'] ?? '';
 $user_email = $_SESSION['user_email'] ?? '';
+$phone = ''; // Add this line
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
@@ -39,14 +44,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $err = '❌ Phone number must be exactly 10 digits (no letters or special characters).';
     } elseif (!$payment) {
         $err = 'Please select a payment method.';
-    } elseif ($payment === 'cod') {
-        // Place order as Cash on Delivery (add DB logic here)
-        $success = 'Order placed successfully! You chose Cash on Delivery.';
-        // Optionally clear cart: unset($_SESSION['cart']);
-    } elseif ($payment === 'esewa') {
-        // Redirect to Esewa payment page
-        header('Location: esewa_payment.php?amount=' . $total);
-        exit();
+    } else {
+        // Validation passed - Create Order
+        $user_id = $_SESSION['user_id'];
+        $shipping_address = $address; // Store full address
+        $payment_status = 'pending';
+        $order_status = 'pending';
+        
+        // 1. Insert into orders table
+        $stmt = $conn->prepare("INSERT INTO orders (user_id, total_amount, payment_method, payment_status, order_status, shipping_address, phone, city, postal_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param('idsssssss', $user_id, $total, $payment, $payment_status, $order_status, $shipping_address, $phone, $city, $postal);
+        
+        if ($stmt->execute()) {
+            $order_id = $stmt->insert_id;
+            $stmt->close();
+            
+            // 2. Insert order items
+            $stmt_item = $conn->prepare("INSERT INTO order_items (order_id, product_id, product_name, price, quantity, total) VALUES (?, ?, ?, ?, ?, ?)");
+            
+            foreach ($cart as $product_id => $item) {
+                $item_total = $item['price'] * $item['qty'];
+                $stmt_item->bind_param('iisdid', $order_id, $product_id, $item['name'], $item['price'], $item['qty'], $item_total);
+                $stmt_item->execute();
+            }
+            $stmt_item->close();
+
+            // 3. Handle Payment Method
+            if ($payment === 'cod') {
+                // Clear cart for COD
+                unset($_SESSION['cart']);
+                header('Location: order_success.php?order_id=' . $order_id);
+                exit();
+            } elseif ($payment === 'esewa') {
+                // Redirect to Esewa payment page with order ID
+                header('Location: esewa_payment.php?order_id=' . $order_id);
+                exit();
+            }
+        } else {
+            $err = 'Failed to place order: ' . $conn->error;
+        }
     }
 }
 ?>
