@@ -92,7 +92,7 @@ $signature = base64_encode(hash_hmac('sha256', $signature_data, $MERCHANT_SECRET
 <nav class="navbar">
     <div class="logo">🛒 ShoeStore</div>
     <ul class="nav-links">
-        <li><a href="front.php">Home</a></li>
+        <li><a href="index.php">Home</a></li>
         <li><a href="products.php">Products</a></li>
         <li><a href="cart.php">Cart 🛒</a></li>
     </ul>

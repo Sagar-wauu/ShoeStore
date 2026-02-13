@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 $public_pages = [
-    'front.php', // home page
+    'index.php', // home page
     'products.php', // product listing
     'product_details.php', // product details
     'login.php',

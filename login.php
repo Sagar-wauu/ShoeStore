@@ -1,6 +1,7 @@
 <?php
 include 'dp.php';
 include 'auth.php';
+require_once 'custom_password.php'; // Add this line
 
 $err = '';
 $next = $_GET['next'] ?? 'index.php';
@@ -23,17 +24,19 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         $res = $stmt->get_result();
         
         if($row = $res->fetch_assoc()){
-            // Debug: Check if password is bcrypt hash or plain text
-            $is_hash = (strpos($row['password'], '$2y$') === 0);
-            
-            if($is_hash){
-                // Use password_verify for bcrypt hashes
-                $password_match = password_verify($pass, $row['password']);
+            $stored = $row['password'];
+            $is_bcrypt = (strpos($stored, '$2y$') === 0);
+            $is_custom = (strlen($stored) === 60 && strpos($stored, '$2y$') !== 0);
+
+            if($is_bcrypt){
+                $password_match = password_verify($pass, $stored);
+            } elseif($is_custom) {
+                $password_match = verifyCustomPassword($pass, $stored);
             } else {
                 // Fallback for plain text passwords (legacy)
-                $password_match = ($pass === $row['password']);
+                $password_match = ($pass === $stored);
             }
-            
+
             if($password_match){
                 $_SESSION['user_id'] = $row['id'];
                 $_SESSION['user_name'] = $row['name'];

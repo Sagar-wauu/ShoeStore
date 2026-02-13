@@ -82,7 +82,7 @@ function is_admin() {
     </div>
     
     <div class="search-container">
-        <input type="text" id="brandSearch" class="search-input" placeholder="Search brands..." autocomplete="off">
+        <input type="text" id="brandSearch" class="search-input" placeholder="Search brand e.g. Nike, Adidas..." autocomplete="off">
         <span class="search-icon">🔍</span>
         <div id="suggestions" class="search-suggestions"></div>
     </div>
@@ -185,7 +185,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('brandSearch');
     const suggestionsBox = document.getElementById('suggestions');
 
-    searchInput.addEventListener('keyup', function() {
+    searchInput.addEventListener('keyup', function(e) {
+        // Handle Enter key
+        if(e.key === 'Enter') {
+            const term = this.value.trim();
+            if(term) {
+                window.location.href = 'products.php?brand=' + encodeURIComponent(term);
+                return;
+            }
+        }
+
         const term = this.value.trim();
         
         if(term.length < 1) {
@@ -208,6 +217,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(err => console.error('Error fetching suggestions:', err));
+    });
+
+    // Handle Search Icon Click
+    document.querySelector('.search-icon').addEventListener('click', function() {
+        const term = searchInput.value.trim();
+        if(term) {
+             window.location.href = 'products.php?brand=' + encodeURIComponent(term);
+        }
     });
 
     // Close suggestions when clicking outside

@@ -114,7 +114,7 @@ $count_stmt->close();
 <nav class="navbar">
     <div class="logo">🛒 ShoeStore</div>
     <ul class="nav-links">
-        <li><a href="front.php">Home</a></li>
+        <li><a href="index.php">Home</a></li>
         <li><a href="products.php">Products</a></li>
         <li><a href="cart.php">Cart 🛒</a></li>
         <?php if(is_logged_in()): ?>
@@ -127,7 +127,7 @@ $count_stmt->close();
 </nav>
 
 <div class="profile-container">
-    <div class="back-link"><a href="front.php">← Back to Home</a></div>
+    <div class="back-link"><a href="index.php">← Back to Home</a></div>
     
     <h1>👤 My Profile</h1>
     
@@ -208,7 +208,14 @@ $count_stmt->close();
                             $total_spent = 0;
                             $orders_result->data_seek(0); // Reset pointer
                             while($order = $orders_result->fetch_assoc()) {
-                                $total_spent += $order['total_amount'];
+                                // Only count if payment is COMPLETED (Handles COD pending exclusion)
+                                // Also exclude cancelled orders
+                                $p_status = strtolower($order['payment_status']);
+                                $o_status = strtolower($order['order_status']);
+                                
+                                if($p_status === 'completed' && $o_status !== 'cancelled') {
+                                    $total_spent += $order['total_amount'];
+                                }
                             }
                             echo 'Rs. ' . number_format($total_spent, 2);
                             ?>

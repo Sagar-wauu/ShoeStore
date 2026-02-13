@@ -1,6 +1,7 @@
 <?php
 include 'dp.php';
 include 'auth.php';
+require_once 'custom_password.php'; 
 
 $err = '';
 $success = '';
@@ -36,7 +37,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         if($stmt->num_rows > 0) {
             $err = '❌ Email already registered. <a href="login.php">Login here</a>';
         } else {
-            $hash = password_hash($pass, PASSWORD_DEFAULT);
+            $hash = customHashPassword($pass); // $pass is the plain password
             $ins = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
             $ins->bind_param('sss', $name, $email, $hash);
             
@@ -44,7 +45,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
                 $_SESSION['user_id'] = $ins->insert_id;
                 $_SESSION['user_name'] = $name;
                 $_SESSION['is_admin'] = 0;
-                header('Location: front.php');
+                header('Location: index.php');
                 exit;
             } else {
                 $err = '❌ Error creating account. Please try again.';
@@ -95,7 +96,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     </form>
     
     <p>Already have an account? <a href="login.php">Login here</a></p>
-    <p><a href="front.php">← Back to Home</a></p>
+    <p><a href="index.php">← Back to Home</a></p>
 </div>
 </body>
 </html>

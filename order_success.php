@@ -7,7 +7,7 @@ require_login();
 $order_id = $_GET['order_id'] ?? null;
 
 if(!$order_id) {
-    header('Location: front.php');
+    header('Location: index.php');
     exit;
 }
 
@@ -23,7 +23,7 @@ $order = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if(!$order) {
-    header('Location: front.php');
+    header('Location: index.php');
     exit;
 }
 
@@ -73,7 +73,7 @@ unset($_SESSION['cart']);
 <nav class="navbar">
     <div class="logo">🛒 ShoeStore</div>
     <ul class="nav-links">
-        <li><a href="front.php">Home</a></li>
+        <li><a href="index.php">Home</a></li>
         <li><a href="products.php">Products</a></li>
         <li><a href="cart.php">Cart 🛒</a></li>
         <li><a href="profile.php">👤 Profile</a></li>

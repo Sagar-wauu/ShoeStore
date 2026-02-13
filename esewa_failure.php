@@ -48,7 +48,7 @@ if($order) {
 <nav class="navbar">
     <div class="logo">🛒 ShoeStore</div>
     <ul class="nav-links">
-        <li><a href="front.php">Home</a></li>
+        <li><a href="index.php">Home</a></li>
         <li><a href="products.php">Products</a></li>
         <li><a href="cart.php">Cart 🛒</a></li>
         <li><a href="login.php">Login</a></li>
@@ -78,7 +78,7 @@ if($order) {
         <div style="margin-top:30px;">
             <a href="checkout.php" class="btn">← Try Again</a>
             <a href="cart.php" class="btn btn-danger">Back to Cart</a>
-            <a href="front.php" class="btn">Home</a>
+            <a href="index.php" class="btn">Home</a>
         </div>
         
         <p style="margin-top:20px; color:#999; font-size:14px;">
