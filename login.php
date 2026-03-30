@@ -75,7 +75,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 </head>
 <body>
 <div class="auth-box">
-    <h2>🔐 Login to ShoeStore</h2>
+    <h2> Login to ShoeStore</h2>
     <?php if($err) echo "<div class='error'>$err</div>"; ?>
     
     <form method="POST">
