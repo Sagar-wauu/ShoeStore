@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postal = trim($_POST['postal'] ?? '');
     $payment = $_POST['payment'] ?? '';
 
-    if ($name === '' || $email === '' || $phone === '' || $address === '' || $city === '' || $postal === '' || $payment === '') {
+    if ($name === '' || $email === '' || $phone === '' || $address === '' || $city === '' || $payment === '') {
         $err = 'Please fill all required fields and select a payment method.';
     } elseif (!$phone) {
         $err = '❌ Phone number is required.';
@@ -66,6 +66,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $item_total = $item['price'] * $item['qty'];
                 $stmt_item->bind_param('iisdid', $order_id, $product_id, $item['name'], $item['price'], $item['qty'], $item_total);
                 $stmt_item->execute();
+                // Decrease stock in products table
+                $update_stock_stmt = $conn->prepare("UPDATE products SET quantity = quantity - ? WHERE id = ? AND quantity >= ?");
+                $update_stock_stmt->bind_param('iii', $item['qty'], $product_id, $item['qty']);
+                $update_stock_stmt->execute();
+                $update_stock_stmt->close();
             }
             $stmt_item->close();
 
@@ -132,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <nav class="navbar">
     <div class="logo">🛒 ShoeStore</div>
     <ul class="nav-links">
-        <li><a href="front.php">Home</a></li>
+        <li><a href="index.php">Home</a></li>
         <li><a href="products.php">Products</a></li>
         <li><a href="cart.php">Cart 🛒</a></li>
         <?php if(is_logged_in()): ?>
@@ -149,14 +154,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if($err) echo "<div class='error'>$err</div>"; ?>
         <?php if($success) echo "<div class='success'>$success</div>"; ?>
         <form method="POST">
-            <div class="section-title">Shipping Address</div>
+            <div class="section-title">Shipping Address *</div>
             <div class="form-group">
-                <label>Full Name</label>
-                <input name="name" value="<?php echo htmlspecialchars($user_name); ?>" required>
+                <label>Full Name *</label>
+                <input name="name" id="name" value="<?php echo htmlspecialchars($user_name); ?>" required minlength="4" oninput="validateName()" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;">
+                <div id="nameError" class="error" style="display:none;margin-top:5px;padding:5px 10px;">❌ Name must be at least 4 letters and contain no numbers</div>
             </div>
             <div class="form-group">
-                <label>Email</label>
-                <input name="email" type="email" value="<?php echo htmlspecialchars($user_email); ?>" required>
+                <label>Email *</label>
+                <input name="email" id="email" type="email" value="<?php echo htmlspecialchars($user_email); ?>" required oninput="validateEmail()" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;">
+                <div id="emailError" class="error" style="display:none;margin-top:5px;padding:5px 10px;">❌ Please enter a valid email address</div>
             </div>
             <div class="form-group" style="margin-bottom:20px;">
                 <label for="phone" style="font-weight:bold;">Phone Number *</label>
@@ -165,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="form-group">
                 <label>Street Address *</label>
-                <textarea name="address" rows="2" required></textarea>
+                <input name="address" type="text" required>
             </div>
             <div class="form-row">
                 <div class="form-group">
@@ -173,14 +180,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input name="city" type="text" required>
                 </div>
                 <div class="form-group">
-                    <label>Postal Code *</label>
-                    <input name="postal" type="text" required>
+                    <label>Postal Code </label>
+                    <input name="postal" type="text">
                 </div>
             </div>
-            <div class="section-title">Payment Method</div>
+            <div class="section-title">Payment Method *</div>
             <div class="payment-methods">
                 <div class="pay-option">
-                    <input type="radio" id="cod" name="payment" value="cod">
+                    <input type="radio" id="cod" name="payment" value="cod" required>
                     <span class="icon">💵</span>
                     <label for="cod">Cash on Delivery (COD)</label>
                     <div style="font-size:14px; color:#555; margin-top:4px;">Pay when your order arrives</div>
@@ -234,6 +241,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
         });
 
+        // Full Name validation
+        function validateName() {
+            const nameInput = document.getElementById('name');
+            const errorMsg = document.getElementById('nameError');
+            // Remove numbers as user types
+            let sanitized = nameInput.value.replace(/[0-9]/g, '');
+            if (sanitized !== nameInput.value) {
+                nameInput.value = sanitized;
+            }
+            // Show error if less than 4 chars or contains numbers
+            if (sanitized.length > 0 && sanitized.length < 4) {
+                errorMsg.style.display = 'block';
+                nameInput.style.borderColor = '#d32f2f';
+            } else {
+                errorMsg.style.display = 'none';
+                nameInput.style.borderColor = '#ddd';
+            }
+        }
+
         // Phone validation
         function validatePhone() {
             const phoneInput = document.getElementById('phone');
@@ -251,6 +277,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 errorMsg.style.display = 'none';
                 phoneInput.style.borderColor = '#ddd';
+            }
+        }
+        // Email validation
+        function validateEmail() {
+            const emailInput = document.getElementById('email');
+            const errorMsg = document.getElementById('emailError');
+            const email = emailInput.value;
+            // Robust email regex
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (email.length === 0 || !emailPattern.test(email)) {
+                errorMsg.style.display = 'block';
+                emailInput.style.borderColor = '#d32f2f';
+            } else {
+                errorMsg.style.display = 'none';
+                emailInput.style.borderColor = '#ddd';
             }
         }
     </script>

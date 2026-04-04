@@ -15,15 +15,17 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     // Validation
     if(!$name) {
         $err = '❌ Full name is required';
-    } elseif(strlen($name) < 3) {
-        $err = '❌ Name must be at least 3 characters';
+    } elseif(strlen($name) < 4) {
+        $err = '❌ Name must be at least 4 characters';
+    } elseif(preg_match('/[0-9]/', $name)) {
+        $err = '❌ Name cannot contain numbers';
     } elseif(!$email) {
         $err = '❌ Email is required';
-    } elseif(!validate_email($email)) {
+    } elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $err = '❌ Invalid email format';
     } elseif(!$pass) {
         $err = '❌ Password is required';
-    } elseif(!validate_password($pass)) {
+    } elseif(strlen($pass) < 6) {
         $err = '❌ Password must be at least 6 characters';
     } elseif($pass !== $pass_confirm) {
         $err = '❌ Passwords do not match';

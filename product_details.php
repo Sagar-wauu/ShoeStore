@@ -114,7 +114,15 @@ $related = $conn->query("SELECT id, name, price, image FROM products WHERE categ
                 </div>
                 <div class="specs-row">
                     <span>In Stock:</span>
-                    <span><?php echo (isset($product['quantity']) && $product['quantity'] > 0) ? '✓ Yes' : '✗ Out of Stock'; ?></span>
+                    <span>
+                        <?php
+                        if (isset($product['quantity']) && $product['quantity'] > 0) {
+                            echo '✓ Yes (' . $product['quantity'] . ' unit' . ($product['quantity'] > 1 ? 's' : '') . ' available)';
+                        } else {
+                            echo '✗ Out of Stock';
+                        }
+                        ?>
+                    </span>
                 </div>
             </div>
             
@@ -157,11 +165,15 @@ $related = $conn->query("SELECT id, name, price, image FROM products WHERE categ
     }
     </script>
     
-    <?php if($related->num_rows > 0): ?>
-        <div class="related">
-            <h2>Related Products</h2>
-            <div class="related-grid">
-                <?php while($rel = $related->fetch_assoc()): ?>
+    <?php 
+        include_once 'recommendation.php';
+        $recommended = get_random_recommendations(4);
+    ?>
+    <div class="related">
+        <h2>You may also like this</h2>
+        <div class="related-grid">
+            <?php if(count($recommended) > 0):
+                foreach($recommended as $rel): ?>
                     <div class="card">
                         <img src="Product images/<?php echo htmlspecialchars($rel['image']); ?>" alt="<?php echo htmlspecialchars($rel['name']); ?>">
                         <div class="card-body">
@@ -170,10 +182,12 @@ $related = $conn->query("SELECT id, name, price, image FROM products WHERE categ
                             <a href="product_details.php?id=<?php echo $rel['id']; ?>">View Details →</a>
                         </div>
                     </div>
-                <?php endwhile; ?>
-            </div>
+                <?php endforeach;
+            else:
+                echo "<p>No products available for recommendation.</p>";
+            endif; ?>
         </div>
-    <?php endif; ?>
+    </div>
 </div>
 
 </body>

@@ -11,12 +11,28 @@ $action = $_GET['action'] ?? '';
 if($action === 'update_status' && isset($_POST['order_id'])) {
     $order_id = (int)$_POST['order_id'];
     $status = trim($_POST['status'] ?? '');
-    
-    if($status) {
+    // Check current status and payment method
+    $check_stmt = $conn->prepare("SELECT order_status, payment_method FROM orders WHERE id=?");
+    $check_stmt->bind_param('i', $order_id);
+    $check_stmt->execute();
+    $check_stmt->bind_result($current_status, $payment_method);
+    $check_stmt->fetch();
+    $check_stmt->close();
+
+    if ($current_status === 'completed' || $current_status === 'cancelled') {
+        $msg = '❌ Cannot modify: Order is already ' . $current_status . '.';
+    } elseif ($status) {
         $stmt = $conn->prepare("UPDATE orders SET order_status=? WHERE id=?");
         $stmt->bind_param('si', $status, $order_id);
         if($stmt->execute()) {
             $msg = '✓ Order status updated!';
+            // If COD and status is completed, set payment_status to completed
+            if (strtolower($payment_method) === 'cod' && $status === 'completed') {
+                $stmt2 = $conn->prepare("UPDATE orders SET payment_status='completed' WHERE id=?");
+                $stmt2->bind_param('i', $order_id);
+                $stmt2->execute();
+                $stmt2->close();
+            }
         }
         $stmt->close();
     }
@@ -126,10 +142,10 @@ function getOrderItems($conn, $order_id) {
                             <form method="POST" action="admin_orders.php?action=update_status" style="display:flex; gap:5px;">
                                 <input type="hidden" name="order_id" value="<?php echo $row['id']; ?>">
                                 <select name="status" onchange="this.form.submit();">
-                                    <option value="pending" <?php echo $row['order_status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                                    <option value="processing" <?php echo $row['order_status'] === 'processing' ? 'selected' : ''; ?>>Processing</option>
-                                    <option value="completed" <?php echo $row['order_status'] === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                                    <option value="cancelled" <?php echo $row['order_status'] === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
+                                    <option value="pending" <?php echo $row['order_status'] === 'pending' ? 'selected' : ''; ?> <?php echo ($row['order_status'] === 'completed' || $row['order_status'] === 'cancelled') ? 'disabled' : ''; ?>>Pending</option>
+                                    <option value="processing" <?php echo $row['order_status'] === 'processing' ? 'selected' : ''; ?> <?php echo ($row['order_status'] === 'completed' || $row['order_status'] === 'cancelled') ? 'disabled' : ''; ?>>Processing</option>
+                                    <option value="completed" <?php echo $row['order_status'] === 'completed' ? 'selected' : ''; ?> <?php echo ($row['order_status'] === 'completed' || $row['order_status'] === 'cancelled') ? 'disabled' : ''; ?>>Completed</option>
+                                    <option value="cancelled" <?php echo $row['order_status'] === 'cancelled' ? 'selected' : ''; ?> <?php echo ($row['order_status'] === 'completed' || $row['order_status'] === 'cancelled') ? 'disabled' : ''; ?>>Cancelled</option>
                                 </select>
                             </form>
                         </td>

@@ -143,36 +143,7 @@ function is_admin() {
 
 
 
-<!-- Recommended Products (only for logged-in users) -->
-<?php if(is_logged_in()): ?>
-    <?php 
-    // Recommendation Algorithm: Random Recommendation
-    // See recommendation.php for implementation
-    include_once 'recommendation.php';
-    $recommended = get_random_recommendations(4);
-    ?>
-    <section class="featured">
-        <h2>🎲 Recommended for You</h2>
-        <div class="featured-grid">
-            <?php if(count($recommended) > 0):
-                foreach($recommended as $row): ?>
-                    <div class='card'>
-                        <img src='Product images/<?= htmlspecialchars($row['image']) ?>' alt='Product'>
-                        <div class='card-body'>
-                            <h3><?= htmlspecialchars($row['name']) ?></h3>
-                            <p style='color:#666; margin:5px 0;'><?= htmlspecialchars($row['brand']) ?></p>
-                            <p class='price'>Rs. <?= number_format($row['price'], 2) ?></p>
-                            <a href='product_details.php?id=<?= $row['id'] ?>' class='btn'>View Details</a>
-                        </div>
-                    </div>
-                <?php endforeach;
-            else:
-                echo "<p>No products available for recommendation.</p>";
-            endif; ?>
-        </div>
-        <p style="text-align:center; color:#888; font-size:13px; margin-top:10px;">Algorithm: Random Recommendation (see <b>recommendation.php</b>)</p>
-    </section>
-<?php endif; ?>
+<!-- Recommendation section removed as per request -->
 
 <!-- Features Section -->
 <section class="features">
