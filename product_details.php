@@ -167,7 +167,8 @@ $related = $conn->query("SELECT id, name, price, image FROM products WHERE categ
     
     <?php 
         include_once 'recommendation.php';
-        $recommended = get_random_recommendations(4);
+        // Use content-based filtering by category
+        $recommended = get_category_recommendations($product['category'] ?? '', $product['id'] ?? null, 4);
     ?>
     <div class="related">
         <h2>You may also like this</h2>
