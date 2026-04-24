@@ -265,7 +265,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="form-group">
                     <label>Size *</label>
-                    <input type="text" name="size" required value="<?php echo htmlspecialchars($product['size'] ?? $_POST['size'] ?? ''); ?>" placeholder="e.g., 7, 8, 9">
+                    <input type="text" name="size" required value="<?php echo htmlspecialchars($product['size'] ?? $_POST['size'] ?? ''); ?>" placeholder="e.g., 7">
+                    <small>Only one size can be entered at a time.</small>
                 </div>
             </div>
             

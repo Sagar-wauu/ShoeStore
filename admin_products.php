@@ -113,6 +113,8 @@ $result = $conn->query("SELECT * FROM products ORDER BY created_at DESC");
                 <th>Image</th>
                 <th>Brand</th>
                 <th>Category</th>
+                <th>Color</th>
+                <th>Size</th>
                 <th>Price (Rs.)</th>
                 <th>Stock</th>
                 <th>Actions</th>
@@ -131,6 +133,8 @@ $result = $conn->query("SELECT * FROM products ORDER BY created_at DESC");
                         </td>
                         <td><?php echo htmlspecialchars($row['brand'] ?? ''); ?></td>
                         <td><?php echo htmlspecialchars($row['category'] ?? ''); ?></td>
+                        <td><?php echo htmlspecialchars($row['color'] ?? ''); ?></td>
+                        <td><?php echo htmlspecialchars($row['size'] ?? ''); ?></td>
                         <td><?php echo number_format($row['price'], 2); ?></td>
                         <td>
                             <form method="POST" action="admin_products.php?action=update_stock" style="display:flex; gap:5px; align-items:center;">

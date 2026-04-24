@@ -35,6 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $price = floatval($_POST['price'] ?? 0);
     $quantity = intval($_POST['quantity'] ?? 0);
     $desc = trim($_POST['description'] ?? '');
+    $color = trim($_POST['color'] ?? '');
+    $size = trim($_POST['size'] ?? '');
     $new_image = $product['image'];
 
     // Handle image upload
@@ -55,13 +57,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if ($err === '' && ($name === '' || $brand === '' || $category === '' || $price <= 0 || $quantity < 0)) {
+    if ($err === '' && ($name === '' || $brand === '' || $category === '' || $price <= 0 || $quantity < 0 || $color === '' || $size === '')) {
         $err = 'All fields are required and must be valid.';
     }
 
     if ($err === '') {
-        $stmt = $conn->prepare("UPDATE products SET name=?, brand=?, category=?, price=?, quantity=?, description=?, image=? WHERE id=?");
-        $stmt->bind_param('sssdissi', $name, $brand, $category, $price, $quantity, $desc, $new_image, $id);
+        $stmt = $conn->prepare("UPDATE products SET name=?, brand=?, category=?, price=?, quantity=?, description=?, color=?, size=?, image=? WHERE id=?");
+        $stmt->bind_param('sssdissssi', $name, $brand, $category, $price, $quantity, $desc, $color, $size, $new_image, $id);
         if ($stmt->execute()) {
             $success = 'Product updated successfully!';
             // Refresh product data
@@ -72,6 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'price' => $price,
                 'quantity' => $quantity,
                 'description' => $desc,
+                'color' => $color,
+                'size' => $size,
                 'image' => $new_image
             ]);
         } else {
@@ -112,13 +116,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label>Brand</label>
         <input name="brand" value="<?php echo htmlspecialchars($product['brand']); ?>" placeholder="Brand" required>
         <label>Category</label>
-        <input name="category" value="<?php echo htmlspecialchars($product['category']); ?>" placeholder="Category" required>
+        <select name="category" required>
+            <?php $catVal = $product['category'] ?? ''; ?>
+            <option value="">-- Select Category --</option>
+            <option value="Male" <?php echo (strcasecmp($catVal, 'Male') === 0) ? 'selected' : ''; ?>>Male</option>
+            <option value="Female" <?php echo (strcasecmp($catVal, 'Female') === 0) ? 'selected' : ''; ?>>Female</option>
+            <option value="Kid" <?php echo (strcasecmp($catVal, 'Kid') === 0) ? 'selected' : ''; ?>>Kid</option>
+        </select><br><br>
         <label>Price (Rs.)</label>
         <input name="price" type="number" step="0.01" value="<?php echo htmlspecialchars($product['price']); ?>" placeholder="Price" required>
         <label>Quantity</label>
         <input name="quantity" type="number" value="<?php echo htmlspecialchars($product['quantity']); ?>" placeholder="Quantity" required>
         <label>Description</label>
         <textarea name="description" placeholder="Description" rows="4"><?php echo htmlspecialchars($product['description']); ?></textarea>
+        <label>Color</label>
+        <input name="color" value="<?php echo htmlspecialchars($product['color']); ?>" placeholder="Color" required>
+        <label>Size</label>
+        <input name="size" value="<?php echo htmlspecialchars($product['size']); ?>" placeholder="Size" required>
         <label>Product Image</label>
         <?php if($image_path): ?>
             <img src="<?php echo $image_path; ?>" alt="Current Image">
